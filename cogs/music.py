@@ -892,5 +892,5 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return await ctx.send(f'{member.mention} is now the DJ.')
 
 
-def setup(bot: commands.Bot):
-    bot.add_cog(Music(bot))
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Music(bot))

@@ -59,101 +59,7 @@ class Utility(commands.Cog):
         self.bot.socket_receive = 0
         self.bot.start_time = time.time()
 
-    async def uhh_rtfm_pls(self, ctx, key, obj):
-        page_types = {
-            'latest': 'https://discordpy.readthedocs.io/en/latest',
-            'python': 'https://docs.python.org/3',
-            'asyncpg': 'https://magicstack.github.io/asyncpg/current/',
-            'zaneapi': 'https://docs.zaneapi.com/en/latest/',
-            'aiohttp': 'https://docs.aiohttp.org/en/stable/',
-            'polaroid': 'https://daggy1234.github.io/polaroid/',
-            'master': 'https://discordpy.readthedocs.io/en/master',
-        }
-        if obj is None:
-            await ctx.send(page_types[key])
-            return
-
-        async with self.bot.session.get(
-            f'https://idevision.net/api/public/rtfm?query={obj}&location={page_types.get(key)}&show-labels=false&label-labels=false'
-        ) as resp:
-            if resp.status == 429:
-                time = resp.headers.get('ratelimit-retry-after')
-                await asyncio.sleep(time)
-                return await self.uhh_rtfm_pls(ctx, key, obj)
-            matches = await resp.json()
-            matches = matches['nodes']
-            embed = discord.Embed(color=0x525A32)
-            listy = []
-            for k, v in matches.items():
-                listy.append(f'[`{k}`]({v})')
-            embed.description = '\n'.join(listy)
-            return await ctx.send(embed=embed)
-
-    @commands.command(description='Checks Latency of Bot')
-    async def ping(self, ctx):
-        x = await ctx.send('Pong!')
-        ping = round(self.bot.latency * 1000)
-        content1 = f'Pong! `{ping}ms`'
-        await x.edit(content=str(content1))
-
-    @commands.group(
-        invoke_without_command=True,
-        aliases=[
-            'read_the_friendly_manual',
-            'rtfd',
-            'read_the_friendly_doc',
-            'read_tfm',
-            'read_tfd',
-        ],
-    )
-    async def rtfm(self, ctx, *, thing: str = None):
-        await self.uhh_rtfm_pls(ctx, 'latest', thing)
-
-    @rtfm.command(name='py', aliases=['python'])
-    async def rtfm_py(self, ctx, *, thing: str = None):
-        await self.uhh_rtfm_pls(ctx, 'python', thing)
-
-    @rtfm.command(name='asyncpg', aliases=['apg'])
-    async def rtfm_asyncpg(self, ctx, *, thing: str = None):
-        await self.uhh_rtfm_pls(ctx, 'asyncpg', thing)
-
-    @rtfm.command(name='zaneapi')
-    async def rtfm_zaneapi(self, ctx, *, thing: str = None):
-        await self.uhh_rtfm_pls(ctx, 'zaneapi', thing)
-
-    @rtfm.command(name='aiohttp')
-    async def rtfm_aiohttp(self, ctx, *, thing: str = None):
-        await self.uhh_rtfm_pls(ctx, 'aiohttp', thing)
-
-    @rtfm.command(name='polaroid')
-    async def rtfm_polaroid(self, ctx, *, thing: str = None):
-        await self.uhh_rtfm_pls(ctx, 'polaroid', thing)
-
-    @rtfm.command(name='rust')
-    async def rust(self, ctx, *, text: str):
-        def soup_match(tag):
-            return (
-                all(string in tag.text for string in text.strip().split())
-                and tag.name == 'li'
-            )
-
-        async with self.bot.session.get(
-            'https://doc.rust-lang.org/std/all.html'
-        ) as resp:
-            soup = BeautifulSoup(str(await resp.text()), 'lxml')
-        e = [
-            x.select_one('li > a') for x in soup.find_all(soup_match, limit=8)
-        ]
-        lines = [
-            f"[`{a.string}`](https://doc.rust-lang.org/std/{a.get('href')})"
-            for a in e
-        ]
-        await ctx.send(embed=discord.Embed(description='\n'.join(lines)))
-
-    @rtfm.command(name='master')
-    async def rtfm_master(self, ctx, *, thing: str = None):
-        await self.uhh_rtfm_pls(ctx, 'master', thing)
-
+    
     @executor_function
     @staticmethod
     def translate_text(destination, args: str):
@@ -180,6 +86,7 @@ class Utility(commands.Cog):
         )
         await ctx.send(embed=embed)
 
+    
     @commands.command()
     async def info(self, ctx):  # sourcery no-metrics
         p = pathlib.Path('./')
@@ -456,5 +363,5 @@ class Utility(commands.Cog):
         await self.bot.http.request(thing, json=json)
 
 
-def setup(bot):
-    bot.add_cog(Utility(bot))
+async def setup(bot):
+    await bot.add_cog(Utility(bot))

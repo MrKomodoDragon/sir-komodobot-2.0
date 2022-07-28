@@ -11,7 +11,7 @@ class KomodoBot(commands.Bot):
         self.afk = {}
         self.loop = asyncio.get_event_loop()
         self.session = aiohttp.ClientSession()
-        self.exts = ['utility', 'test', 'music']
+        self.exts = ['utility', 'test', 'rtfm']
         self.config = toml.load('config.toml')
 
     async def get_context(self, message, *, cls=None):
@@ -19,21 +19,22 @@ class KomodoBot(commands.Bot):
 
     async def start(self, token, *, reconnect=True):
         for i in self.exts:
-            self.load_extension(f'cogs.{i}')
-        self.load_extension('jishaku')
+            await self.load_extension(f'cogs.{i}')
+        await self.load_extension('jishaku')
         import os
 
         os.environ['JISHAKU_NO_UNDERSCORE'] = 'True'
         os.environ['JISHAKU_NO_DM_TRACEBACK'] = 'True'
         os.environ['JISHAKU_HIDE'] = 'True'
-        self.reload_extension('jishaku')
+        await self.reload_extension('jishaku')
+
         return await super().start(token, reconnect=reconnect)
 
     async def close(self):
         for i in self.exts:
-            self.unload_extension(f'cogs.{i}')
+            await self.unload_extension(f'cogs.{i}')
         await self.session.close()
         return await super().close()
 
     async def on_message_edit(self, before, after):
-        ...
+        await self.process_commands(after)

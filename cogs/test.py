@@ -63,5 +63,5 @@ class Test(commands.Cog):
             await ctx.message.add_reaction('<:greenTick:596576670815879169>')
 
 
-def setup(bot):
-    bot.add_cog(Test(bot))
+async def setup(bot):
+    await bot.add_cog(Test(bot))
